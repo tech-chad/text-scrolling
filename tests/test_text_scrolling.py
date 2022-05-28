@@ -47,6 +47,15 @@ def test_argument_parser_color(argument, expected_result):
     assert result.color == expected_result
 
 
+@pytest.mark.parametrize("argument, expected_result", [
+    ([], "black"), (["-C", "green"], "green"),
+    (["--bg_text_color", "blue"], "blue"),
+])
+def test_argument_parser(argument, expected_result):
+    result = text_scrolling.argument_parser(argument)
+    assert result.bg_text_color == expected_result
+
+
 @pytest.mark.parametrize("test_values, expected_results", [
     ("0", 0), ("1", 1), ("2", 2), ("3", 3), ("4", 4),
     ("5", 5), ("6", 6), ("7", 7), ("8", 8), ("9", 9)

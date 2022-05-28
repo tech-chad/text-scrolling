@@ -19,12 +19,14 @@ CURSES_COLOR = {"red": curses.COLOR_RED, "green": curses.COLOR_GREEN,
 COLORS = ["red", "green", "blue", "yellow", "magenta", "cyan", "white", "black"]
 
 
-def set_curses_color(color: str) -> None:
+def set_curses_color(color: str, bg_color: str) -> None:
     curses.init_pair(1, CURSES_BLACK, CURSES_BLACK)
     if color == "random":
-        curses.init_pair(2, random.randrange(0, curses.COLORS), CURSES_BLACK)
+        curses.init_pair(2,
+                         random.randrange(0, curses.COLORS),
+                         CURSES_COLOR[bg_color])
     else:
-        curses.init_pair(2, CURSES_COLOR[color], CURSES_BLACK)
+        curses.init_pair(2, CURSES_COLOR[color], CURSES_COLOR[bg_color])
 
 
 def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
@@ -32,10 +34,12 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
     screen.timeout(0)  # Turn blocking off for screen.getch().
     curses.use_default_colors()
     color = "random" if args.color is None else args.color
-    set_curses_color(color)
+    text_bg_color = args.bg_text_color
+    set_curses_color(color, text_bg_color)
     screen.bkgd(" ", curses.color_pair(1))
     delay = SPEED[args.speed]
     color_number = 0
+    text_bg_color_number = 0
 
     size_y, size_x = screen.getmaxyx()
     x = text_end = size_x - 1
@@ -67,7 +71,7 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             x = text_end = size_x - 1
             y = random.randint(0, size_y - 1)
             text_start = 0
-            set_curses_color(color)
+            set_curses_color(color, text_bg_color)
 
         ch = screen.getch()
         if ch != -1 and args.screensaver:
@@ -78,11 +82,18 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             delay = SPEED[int(chr(ch))]
         elif ch == 99:  # c
             color = COLORS[color_number]
-            set_curses_color(color)
-            color_number = 0 if color_number == 6 else color_number + 1
+            set_curses_color(color, text_bg_color)
+            color_number = 0 if color_number == 7 else color_number + 1
         elif ch == 114:  # r
             color = "random"
-            set_curses_color(color)
+            set_curses_color(color, text_bg_color)
+        elif ch == 67:  # C
+            text_bg_color = COLORS[text_bg_color_number]
+            set_curses_color(color, text_bg_color)
+            if text_bg_color_number == 7:
+                text_bg_color_number = 0
+            else:
+                text_bg_color_number += 1
 
 
 def positive_int_zero_to_nine(value: str) -> int:
@@ -125,6 +136,9 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("-c", "--color", type=color_type,
                         help=f"Set solid color. Available solid color: "
                              f"{', '.join(COLORS)}")
+    parser.add_argument("-C", "--bg_text_color", type=color_type,
+                        metavar="COLOR",
+                        default="black", help="Set text background color")
 
     parser.add_argument("--screensaver", action="store_true",
                         help="Screensaver mode. Any key will exit")
