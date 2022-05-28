@@ -11,18 +11,31 @@ from typing import Sequence
 DEFAULT_TEXT = "Your custom text here"
 DEFAULT_SPEED = 4
 SPEED = [0.01, 0.025, 0.03, 0.04, 0.05, 0.07, 0.08, 0.09, 0.15, 0.3]
+CURSES_BLACK = 16
+CURSES_COLOR = {"red": curses.COLOR_RED, "green": curses.COLOR_GREEN,
+                "blue": curses.COLOR_BLUE, "yellow": curses.COLOR_YELLOW,
+                "magenta": curses.COLOR_MAGENTA, "cyan": curses.COLOR_CYAN,
+                "white": curses.COLOR_WHITE, "black": CURSES_BLACK}
+COLORS = ["red", "green", "blue", "yellow", "magenta", "cyan", "white", "black"]
 
 
-def set_curses_color() -> None:
-    curses.init_pair(1, random.randrange(0, curses.COLORS), 16)
+def set_curses_color(color: str) -> None:
+    curses.init_pair(1, CURSES_BLACK, CURSES_BLACK)
+    if color == "random":
+        curses.init_pair(2, random.randrange(0, curses.COLORS), CURSES_BLACK)
+    else:
+        curses.init_pair(2, CURSES_COLOR[color], CURSES_BLACK)
 
 
 def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
     curses.curs_set(0)  # Set the cursor to off.
     screen.timeout(0)  # Turn blocking off for screen.getch().
     curses.use_default_colors()
-    set_curses_color()
+    color = "random" if args.color is None else args.color
+    set_curses_color(color)
+    screen.bkgd(" ", curses.color_pair(1))
     delay = SPEED[args.speed]
+    color_number = 0
 
     size_y, size_x = screen.getmaxyx()
     x = text_end = size_x - 1
@@ -47,14 +60,14 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
         text_end -= 1
         screen.addstr(y, x,
                       args.text[text_start:size_x - text_end],
-                      curses.color_pair(1))
+                      curses.color_pair(2))
         screen.clrtoeol()  # removes the last letter
         screen.refresh()
         if text_start >= len(args.text) + 5:  # done with current line?
             x = text_end = size_x - 1
             y = random.randint(0, size_y - 1)
             text_start = 0
-            set_curses_color()
+            set_curses_color(color)
 
         ch = screen.getch()
         if ch != -1 and args.screensaver:
@@ -63,6 +76,13 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             run = False
         elif 48 <= ch <= 57:  # 0 to 9
             delay = SPEED[int(chr(ch))]
+        elif ch == 99:  # c
+            color = COLORS[color_number]
+            set_curses_color(color)
+            color_number = 0 if color_number == 6 else color_number + 1
+        elif ch == 114:  # r
+            color = "random"
+            set_curses_color(color)
 
 
 def positive_int_zero_to_nine(value: str) -> int:
@@ -81,6 +101,18 @@ def positive_int_zero_to_nine(value: str) -> int:
                                          f"value 0 to 9")
 
 
+def color_type(value: str) -> str:
+    """
+    Used with argparse
+    Checks to see if the value is a valid color and returns
+    the lower case color name.
+    """
+    lower_value = value.lower()
+    if lower_value in CURSES_COLOR.keys():
+        return lower_value
+    raise argparse.ArgumentTypeError(f"{value} is an invalid color name")
+
+
 def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("text", default=DEFAULT_TEXT, nargs="?",
@@ -90,6 +122,9 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
                         default=DEFAULT_SPEED,
                         help=f"Set scrolling speed 0 to 9.  (0-Fast, "
                              f"{DEFAULT_SPEED}-Default, 9-Slow)")
+    parser.add_argument("-c", "--color", type=color_type,
+                        help=f"Set solid color. Available solid color: "
+                             f"{', '.join(COLORS)}")
 
     parser.add_argument("--screensaver", action="store_true",
                         help="Screensaver mode. Any key will exit")

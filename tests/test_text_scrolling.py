@@ -39,6 +39,14 @@ def test_argument_parser_screensaver(argument, expected_result):
     assert result.screensaver == expected_result
 
 
+@pytest.mark.parametrize("argument, expected_result", [
+    ([], None,), (["-c", "blue"], "blue"), (["--color", "red"], "red")
+])
+def test_argument_parser_color(argument, expected_result):
+    result = text_scrolling.argument_parser(argument)
+    assert result.color == expected_result
+
+
 @pytest.mark.parametrize("test_values, expected_results", [
     ("0", 0), ("1", 1), ("2", 2), ("3", 3), ("4", 4),
     ("5", 5), ("6", 6), ("7", 7), ("8", 8), ("9", 9)
@@ -54,3 +62,22 @@ def test_positive_int_zero_to_nine_normal(test_values, expected_results):
 def test_positive_int_zero_to_nine_error(test_values):
     with pytest.raises(text_scrolling.argparse.ArgumentTypeError):
         text_scrolling.positive_int_zero_to_nine(test_values)
+
+
+@pytest.mark.parametrize("test_values, expected_results", [
+    ("red", "red"), ("Green", "green"), ("BLUE", "blue"),
+    ("yeLLOW", "yellow"), ("magenta", "magenta"),
+    ("Cyan", "cyan"), ("whiTe", "white")
+])
+def test_color_type_normal(test_values, expected_results):
+    result = text_scrolling.color_type(test_values)
+    assert result
+
+
+@pytest.mark.parametrize("test_values", [
+    "orange", "12", "who", "<>", "", " ", "ter8934", "834DFD",
+    "blue1", "234", "55white"
+])
+def test_color_type_error(test_values):
+    with pytest.raises(text_scrolling.argparse.ArgumentTypeError):
+        text_scrolling.color_type(test_values)
