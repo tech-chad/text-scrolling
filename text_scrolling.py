@@ -99,7 +99,10 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 def main():
     args = argument_parser()
-    curses.wrapper(curses_main, args)
+    try:
+        curses.wrapper(curses_main, args)
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == "__main__":
