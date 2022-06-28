@@ -67,6 +67,9 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             attributes += curses.A_BOLD
         if args.italic_text:
             attributes += curses.A_ITALIC
+        if args.underline_text:
+            attributes += curses.A_UNDERLINE
+
         screen.addstr(y, x,
                       args.text[text_start:size_x - text_end],
                       curses.color_pair(2) + attributes)
@@ -102,6 +105,7 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
         elif ch == 100:  # d
             args.bold_text = False
             args.italic_text = False
+            args.underline_text = False
             delay = SPEED[DEFAULT_SPEED]
             color = "random"
             text_bg_color = "black"
@@ -110,6 +114,8 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             args.bold_text = not args.bold_text
         elif ch == 105:  # i
             args.italic_text = not args.italic_text
+        elif ch == 117:  # u
+            args.underline_text = not args.underline_text
 
 
 def positive_int_zero_to_nine(value: str) -> int:
@@ -159,6 +165,8 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
                         help="Bold text")
     parser.add_argument("-i", "--italic_text", action="store_true",
                         help="Italic text")
+    parser.add_argument("-u", "--underline_text", action="store_true",
+                        help="Underline text")
 
     parser.add_argument("--screensaver", action="store_true",
                         help="Screensaver mode. Any key will exit")
