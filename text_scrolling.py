@@ -94,6 +94,11 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
                 text_bg_color_number = 0
             else:
                 text_bg_color_number += 1
+        elif ch == 100:  # d
+            delay = SPEED[DEFAULT_SPEED]
+            color = "random"
+            text_bg_color = "black"
+            set_curses_color(color, text_bg_color)
 
 
 def positive_int_zero_to_nine(value: str) -> int:
