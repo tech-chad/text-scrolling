@@ -181,8 +181,8 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main():
-    args = argument_parser()
+def main(argv: Optional[Sequence[str]] = None):
+    args = argument_parser(argv)
     try:
         curses.wrapper(curses_main, args)
     except KeyboardInterrupt:

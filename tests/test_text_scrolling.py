@@ -1,3 +1,7 @@
+import curses
+import os
+from unittest import mock
+
 import pytest
 
 import text_scrolling
@@ -122,3 +126,67 @@ def test_color_type_normal(test_values, expected_results):
 def test_color_type_error(test_values):
     with pytest.raises(text_scrolling.argparse.ArgumentTypeError):
         text_scrolling.color_type(test_values)
+
+
+@mock.patch.dict(os.environ, {"TERM": "xterm-256color"})
+def test_set_curses_color_random():
+    with mock.patch.object(text_scrolling.random, "randrange", return_value=24):
+        curses.initscr()
+        curses.start_color()
+        text_scrolling.set_curses_color("random", "black")
+        assert curses.pair_content(2) == (24, 16)
+        assert curses.pair_content(1) == (16, 16)
+
+
+@pytest.mark.parametrize("bg_color, color_num", [
+    ("red", 1), ("green", 2), ("yellow", 3), ("blue", 4),
+    ("magenta", 5), ("cyan", 6), ("white", 7),
+])
+@mock.patch.dict(os.environ, {"TERM": "xterm-256color"})
+def test_set_curses_color_random_set_bg_color(bg_color, color_num):
+    with mock.patch.object(text_scrolling.random, "randrange", return_value=24):
+        curses.initscr()
+        curses.start_color()
+        text_scrolling.set_curses_color("random", bg_color)
+        assert curses.pair_content(2) == (24, color_num)
+        assert curses.pair_content(1) == (16, 16)
+
+
+@pytest.mark.parametrize("color, color_num", [
+    ("red", 1), ("green", 2), ("yellow", 3), ("blue", 4),
+    ("magenta", 5), ("cyan", 6), ("white", 7),
+])
+@mock.patch.dict(os.environ, {"TERM": "xterm-256color"})
+def test_set_curses_color_color(color, color_num):
+    curses.initscr()
+    curses.start_color()
+    text_scrolling.set_curses_color(color, "black")
+    assert curses.pair_content(2) == (color_num, 16)
+    assert curses.pair_content(1) == (16, 16)
+
+
+@pytest.mark.parametrize("bg_color, color_num", [
+    ("red", 1), ("green", 2), ("yellow", 3), ("blue", 4),
+    ("magenta", 5), ("cyan", 6), ("white", 7),
+])
+@mock.patch.dict(os.environ, {"TERM": "xterm-256color"})
+def test_set_curses_color_color_bg_color(bg_color, color_num):
+    curses.initscr()
+    curses.start_color()
+    text_scrolling.set_curses_color("blue", bg_color)
+    assert curses.pair_content(2) == (4, color_num)
+    assert curses.pair_content(1) == (16, 16)
+
+
+def test_argument_parser_show_help(capsys):
+    with pytest.raises(SystemExit):
+        text_scrolling.argument_parser(["-h"])
+        captured_output = capsys.readouterr().out
+        assert "usage:" in captured_output
+
+
+def test_text_scrolling_main_show_help(capsys):
+    with pytest.raises(SystemExit):
+        text_scrolling.main(["-h"])
+        captured_output = capsys.readouterr().out
+        assert "usage:" in captured_output
