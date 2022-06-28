@@ -80,6 +80,14 @@ def test_argument_parser_underline_text(argument, expected_result):
     assert result.underline_text == expected_result
 
 
+@pytest.mark.parametrize("argument, expected_result", [
+    ([], False), (["-f"], True), (["--flash_text"], True),
+])
+def test_argument_parser_flashing_text(argument, expected_result):
+    result = text_scrolling.argument_parser(argument)
+    assert result.flash_text == expected_result
+
+
 @pytest.mark.parametrize("test_values, expected_results", [
     ("0", 0), ("1", 1), ("2", 2), ("3", 3), ("4", 4),
     ("5", 5), ("6", 6), ("7", 7), ("8", 8), ("9", 9)
