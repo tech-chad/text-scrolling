@@ -62,9 +62,12 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             x = 0
             text_start += 1
         text_end -= 1
+        attributes = curses.A_NORMAL
+        if args.bold_text:
+            attributes += curses.A_BOLD
         screen.addstr(y, x,
                       args.text[text_start:size_x - text_end],
-                      curses.color_pair(2))
+                      curses.color_pair(2) + attributes)
         screen.clrtoeol()  # removes the last letter
         screen.refresh()
         if text_start >= len(args.text) + 5:  # done with current line?
@@ -95,10 +98,13 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             else:
                 text_bg_color_number += 1
         elif ch == 100:  # d
+            args.bold_text = False
             delay = SPEED[DEFAULT_SPEED]
             color = "random"
             text_bg_color = "black"
             set_curses_color(color, text_bg_color)
+        elif ch == 98:  # b
+            args.bold_text = not args.bold_text
 
 
 def positive_int_zero_to_nine(value: str) -> int:
@@ -144,6 +150,8 @@ def argument_parser(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("-C", "--bg_text_color", type=color_type,
                         metavar="COLOR",
                         default="black", help="Set text background color")
+    parser.add_argument("-b", "--bold_text", action="store_true",
+                        help="Bold text")
 
     parser.add_argument("--screensaver", action="store_true",
                         help="Screensaver mode. Any key will exit")
