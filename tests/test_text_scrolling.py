@@ -64,6 +64,14 @@ def test_argument_parser_bold_text(argument, expected_result):
     assert result.bold_text == expected_result
 
 
+@pytest.mark.parametrize("argument, expected_result", [
+    ([], False), (["-i"], True), (["--italic_text"], True),
+])
+def test_argument_parser_italic_text(argument, expected_result):
+    result = text_scrolling.argument_parser(argument)
+    assert result.italic_text == expected_result
+
+
 @pytest.mark.parametrize("test_values, expected_results", [
     ("0", 0), ("1", 1), ("2", 2), ("3", 3), ("4", 4),
     ("5", 5), ("6", 6), ("7", 7), ("8", 8), ("9", 9)
