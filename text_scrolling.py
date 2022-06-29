@@ -129,6 +129,8 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             args.underline_text = not args.underline_text
         elif ch == 102:  # f
             args.flash_text = not args.flash_text
+    screen.erase()
+    screen.refresh()
 
 
 def positive_int_zero_to_nine(value: str) -> int:
