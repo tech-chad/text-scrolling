@@ -110,9 +110,10 @@ def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):
             args.underline_text = False
             args.flash_text = False
             delay = SPEED[DEFAULT_SPEED]
-            color = "random"
-            text_bg_color = "black"
-            set_curses_color(color, text_bg_color)
+            if color != "random" or text_bg_color != "black":
+                text_bg_color = "black"
+                color = "random"
+                set_curses_color(color, text_bg_color)
         elif ch == 98:  # b
             args.bold_text = not args.bold_text
         elif ch == 105:  # i
