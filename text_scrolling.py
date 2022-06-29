@@ -16,17 +16,24 @@ CURSES_COLOR = {"red": curses.COLOR_RED, "green": curses.COLOR_GREEN,
                 "blue": curses.COLOR_BLUE, "yellow": curses.COLOR_YELLOW,
                 "magenta": curses.COLOR_MAGENTA, "cyan": curses.COLOR_CYAN,
                 "white": curses.COLOR_WHITE, "black": CURSES_BLACK}
+CURSES_8_COLOR = {"red": curses.COLOR_RED, "green": curses.COLOR_GREEN,
+                  "blue": curses.COLOR_BLUE, "yellow": curses.COLOR_YELLOW,
+                  "magenta": curses.COLOR_MAGENTA, "cyan": curses.COLOR_CYAN,
+                  "white": curses.COLOR_WHITE, "black": curses.COLOR_BLACK}
 COLORS = ["red", "green", "blue", "yellow", "magenta", "cyan", "white", "black"]
 
 
 def set_curses_color(color: str, bg_color: str) -> None:
-    curses.init_pair(1, CURSES_BLACK, CURSES_BLACK)
+    if curses.COLORS == 8:
+        colors = CURSES_8_COLOR
+    else:
+        colors = CURSES_COLOR
+    curses.init_pair(1, colors["black"], colors["black"])
     if color == "random":
         curses.init_pair(2,
-                         random.randrange(0, curses.COLORS),
-                         CURSES_COLOR[bg_color])
+                         random.randrange(0, curses.COLORS), colors[bg_color])
     else:
-        curses.init_pair(2, CURSES_COLOR[color], CURSES_COLOR[bg_color])
+        curses.init_pair(2, colors[color], colors[bg_color])
 
 
 def curses_main(screen: curses._CursesWindow, args: argparse.Namespace):

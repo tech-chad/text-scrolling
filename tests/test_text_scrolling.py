@@ -178,6 +178,23 @@ def test_set_curses_color_color_bg_color(bg_color, color_num):
     assert curses.pair_content(1) == (16, 16)
 
 
+def test_set_curses_colors_8_colors():
+    curses.initscr()
+    curses.start_color()
+    with mock.patch.object(text_scrolling.curses, "COLORS", 8):
+        text_scrolling.set_curses_color("random", "black")
+        assert curses.pair_content(1) == (0, 0)
+
+
+def test_set_curses_8_colors_random():
+    with mock.patch.object(text_scrolling.curses, "COLORS", 8):
+        with mock.patch.object(text_scrolling.random, "randrange",
+                               return_value=2):
+            text_scrolling.set_curses_color("random", "black")
+            assert curses.pair_content(1) == (0, 0)
+            assert curses.pair_content(2) == (2, 0)
+
+
 def test_argument_parser_show_help(capsys):
     with pytest.raises(SystemExit):
         text_scrolling.argument_parser(["-h"])
